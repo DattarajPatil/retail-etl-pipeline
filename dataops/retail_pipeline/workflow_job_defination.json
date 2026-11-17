@@ -1,0 +1,72 @@
+{
+  "name": "retail-etl-pipeline",
+  "max_concurrent_runs": 1,
+  "git_source": {
+    "git_url": "https://github.com/DattarajPatil/retail-etl-pipeline",
+    "git_provider": "gitHub",
+    "git_branch": "main"
+  },
+  "job_clusters": [
+    {
+      "job_cluster_key": "etl_cluster",
+      "new_cluster": {
+        "spark_version": "15.4.x-scala2.12",
+        "node_type_id": "m5.xlarge",
+        "num_workers": 1,
+        "data_security_mode": "SINGLE_USER"
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "task_key": "raw_ingest",
+      "description": "Source files in retail.raw.landing -> retail.raw.* (append, string columns, lineage metadata)",
+      "job_cluster_key": "etl_cluster",
+      "spark_python_task": {
+        "python_file":"src/code/row/raw_ingest.py",
+        "parameters": ["--layer", "raw"],
+        "source": "GIT"
+      },
+      "max_retries": 1,
+      "min_retry_interval_millis": 60000,
+      "timeout_seconds": 3600
+    },
+    {
+      "task_key": "refine_transform",
+      "description": "retail.raw.* -> retail.refined.* (types, cleaning, dedupe, rejected rows)",
+      "depends_on": [{ "task_key": "raw_ingest" }],
+      "job_cluster_key": "etl_cluster",
+      "spark_python_task": {
+        "python_file": "src/code/refine/refine_transform.py",
+        "parameters": ["--layer", "refined"],
+        "source": "GIT"
+      },
+      "max_retries": 1,
+      "min_retry_interval_millis": 60000,
+      "timeout_seconds": 3600
+    },
+    {
+      "task_key": "confirm_curated",
+      "description": "retail.refined.* -> retail.curated.* (dims, fact_sales, aggregates)",
+      "depends_on": [{ "task_key": "refine_transform" }],
+      "job_cluster_key": "etl_cluster",
+      "spark_python_task": {
+        "python_file": "src/code/confirm/curated_transform.py",
+        "parameters": ["--layer", "curated"],
+        "source": "GIT"
+      },
+      "max_retries": 1,
+      "min_retry_interval_millis": 60000,
+      "timeout_seconds": 3600
+    }
+  ],
+  "schedule": {
+    "quartz_cron_expression": "0 0 2 * * ?",
+    "timezone_id": "Asia/Kolkata",
+    "pause_status": "PAUSED"
+  },
+  "email_notifications": {
+    "on_failure": ["dattarajpatil1111@gmail.com"]
+  },
+  "tags": { "project": "retail-etl-pipeline", "layers": "raw-refined-curated" }
+}
