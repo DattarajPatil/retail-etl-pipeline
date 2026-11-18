@@ -23,7 +23,7 @@
       "description": "Source files in retail.raw.landing -> retail.raw.* (append, string columns, lineage metadata)",
       "job_cluster_key": "etl_cluster",
       "spark_python_task": {
-        "python_file":"src/code/row/raw_ingest.py",
+        "python_file": "dataops/retail_pipeline/run_pipeline.py",
         "parameters": ["--layer", "raw"],
         "source": "GIT"
       },
@@ -37,7 +37,7 @@
       "depends_on": [{ "task_key": "raw_ingest" }],
       "job_cluster_key": "etl_cluster",
       "spark_python_task": {
-        "python_file": "src/code/refine/refine_transform.py",
+        "python_file": "dataops/retail_pipeline/run_pipeline.py",
         "parameters": ["--layer", "refined"],
         "source": "GIT"
       },
@@ -51,7 +51,7 @@
       "depends_on": [{ "task_key": "refine_transform" }],
       "job_cluster_key": "etl_cluster",
       "spark_python_task": {
-        "python_file": "src/code/confirm/curated_transform.py",
+        "python_file": "dataops/retail_pipeline/run_pipeline.py",
         "parameters": ["--layer", "curated"],
         "source": "GIT"
       },
@@ -66,7 +66,7 @@
     "pause_status": "PAUSED"
   },
   "email_notifications": {
-    "on_failure": ["dattarajpatil1111@gmail.com"]
+    "on_failure": ["you@example.com"]
   },
   "tags": { "project": "retail-etl-pipeline", "layers": "raw-refined-curated" }
 }
