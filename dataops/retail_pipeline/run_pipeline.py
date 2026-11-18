@@ -11,13 +11,23 @@ except NameError:                       # Databricks notebook: set the repo path
     ROOT = pathlib.Path("/Workspace/Repos/<you>/retail-etl-pipeline")
 sys.path.insert(0, str(ROOT))
 
-from utils.config import IS_DATABRICKS
+from utils.config import IS_DATABRICKS, CATALOG, RAW, REFINED, CURATED
 from utils.helpers import get_spark, new_batch_id, reset_local_warehouse, log
 from src.code.row import raw_ingest
 from src.code.refine import refine_transform
 from src.code.refine.refine_schemas import REFINED_DDL
 from src.code.confirm import curated_transform
 from src.code.confirm.curated_schemas import CURATED_DDL
+
+def ensure_objects(spark):
+    """Databricks: create catalog (if allowed), schemas and the landing volume when missing."""
+    try:
+        spark.sql(f"CREATE CATALOG IF NOT EXISTS {CATALOG}")
+    except Exception as e:
+        log.warning("Could not create catalog %s (%s). Using it only if it already exists.", CATALOG, str(e)[:120])
+    for schema in (RAW, REFINED, CURATED):
+        spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{schema}")
+    spark.sql(f"CREATE VOLUME IF NOT EXISTS {CATALOG}.{RAW}.landing")
 
 def main(layer: str = "all"):
     spark = get_spark()
@@ -27,10 +37,11 @@ def main(layer: str = "all"):
     if layer in ("raw", "all") and not IS_DATABRICKS:
         reset_local_warehouse()          # local RAW is append-only, so start clean
     if IS_DATABRICKS:
+        ensure_objects(spark)
         ddl = (REFINED_DDL if layer in ("refined", "all") else []) + \
               (CURATED_DDL if layer in ("curated", "all") else [])
         for stmt in ddl:
-            spark.sql(stmt)
+            spark.sql(stmt.replace("retail.", f"{CATALOG}."))
 
     if layer in ("raw", "all"):
         raw_ingest.run(spark, batch_id)

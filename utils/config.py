@@ -4,7 +4,9 @@ import os, pathlib
 IS_DATABRICKS = "DATABRICKS_RUNTIME_VERSION" in os.environ
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[1]
 
-CATALOG = "retail"
+# Unity Catalog catalog name. If your workspace does not allow CREATE CATALOG (e.g. Free Edition),
+# the default below is "workspace" (the catalog Free Edition provides). Set env var RETAIL_CATALOG to override.
+CATALOG = os.getenv("RETAIL_CATALOG", "workspace")
 RAW, REFINED, CURATED = "raw", "refined", "curated"
 
 # Where the source files live
