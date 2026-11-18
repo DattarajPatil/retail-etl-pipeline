@@ -1,6 +1,6 @@
 """RAW -> REFINED transformations."""
 from pyspark.sql import functions as F
-from utils.config import RAW, REFINED, fqn
+from utils.config import RAW, REFINED
 from utils.helpers import write_table, read_table, log
 
 def _raw(spark, t):

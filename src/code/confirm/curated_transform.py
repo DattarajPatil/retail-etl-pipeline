@@ -1,7 +1,7 @@
 """REFINED -> CURATED transformations (dims first, then fact, then aggregates)."""
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
-from utils.config import REFINED, CURATED, fqn
+from utils.config import REFINED, CURATED
 from utils.helpers import write_table, read_table, log
 
 def _ref(spark, t):

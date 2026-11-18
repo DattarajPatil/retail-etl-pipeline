@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {"name": "1. Run pipeline (local)", "type": "debugpy", "request": "launch",
+     "program": "${workspaceFolder}/dataops/retail_pipeline/run_pipeline.py", "console": "integratedTerminal",
+     "cwd": "${workspaceFolder}"},
+    {"name": "2. Show results", "type": "debugpy", "request": "launch",
+     "program": "${workspaceFolder}/dataops/retail_pipeline/show_results.py", "console": "integratedTerminal",
+     "cwd": "${workspaceFolder}"}
+  ]
+}
