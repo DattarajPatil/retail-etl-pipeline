@@ -6,7 +6,7 @@ Usage:
 """
 import sys, pathlib, argparse
 try:
-    ROOT = pathlib.Path(__file__).resolve().parents[1]
+    ROOT = next(p for p in pathlib.Path(__file__).resolve().parents if (p / "utils").is_dir())
 except NameError:                       # Databricks notebook: set the repo path manually
     ROOT = pathlib.Path("/Workspace/Repos/<you>/retail-etl-pipeline")
 sys.path.insert(0, str(ROOT))
