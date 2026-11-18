@@ -7,7 +7,12 @@ log = logging.getLogger("retail-etl")
 
 def get_spark() -> SparkSession:
     if IS_DATABRICKS:
-        return SparkSession.builder.getOrCreate()
+        spark = SparkSession.builder.getOrCreate()
+        try:   # serverless defaults to ANSI mode, where bad casts raise errors instead of returning NULL
+            spark.conf.set("spark.sql.ansi.enabled", "false")
+        except Exception as e:
+            log.warning("Could not disable ANSI mode: %s", e)
+        return spark
     spark = (SparkSession.builder.master("local[*]").appName("retail-etl-local")
              .config("spark.sql.shuffle.partitions", "4")
              .config("spark.ui.enabled", "false")
